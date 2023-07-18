@@ -1,0 +1,108 @@
+package com.samara.main_files_impl.domain
+
+import android.os.Parcelable
+import com.samara.main_files_api.data.IFilesRepo
+import com.samara.main_files_api.domain.models.FileDomain
+import com.samara.main_files_api.domain.useCase.IMainFilesUseCase
+import di.modules.IoDispatcher
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancelChildren
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
+
+
+class MainFilesUseCase @Inject constructor(
+    private val filesRepo: IFilesRepo,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher
+) : IMainFilesUseCase {
+
+    @Parcelize
+    data class FilesState(
+        override val listFiles: List<FileDomain> = emptyList(),
+        override val depthNumber: Long = 0L,
+        override val currentPath: String = ""
+    ) : IMainFilesUseCase.State, Parcelable
+
+    private val _filesState: MutableStateFlow<IMainFilesUseCase.State> = MutableStateFlow(
+        FilesState()
+    )
+    override val filesState: StateFlow<IMainFilesUseCase.State>
+        get() = _filesState.asStateFlow()
+
+    private val actualState: FilesState
+        get() = filesState.value as FilesState
+
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val innerDispatcher = Dispatchers.IO.limitedParallelism(1)
+    private val context = innerDispatcher + SupervisorJob()
+    private val innerScope: CoroutineScope = CoroutineScope(context)
+
+    private fun launchWork(fileWork: suspend () -> FilesState) {
+        innerScope.launch {
+            _filesState.emit(
+                fileWork.invoke()
+            )
+        }
+    }
+
+    private suspend fun getFiles(absolutePath: String? = null): List<FileDomain> = withContext(ioDispatcher) {
+        val files = filesRepo.getFiles(absolutePath).map {
+            FileDomain(it.absolutePath, it.name, it.isDirectory)
+        }
+
+        return@withContext files.sortedWith(compareBy({ !it.isDir }, { it.title }))
+    }
+
+    private suspend fun getInitialPath(): String = filesRepo.getInitialPath()
+
+    override fun openDir(path: String?) = launchWork {
+        val result = getFiles(path)
+
+        actualState.copy(
+            listFiles = result,
+            depthNumber = actualState.depthNumber + 1,
+            currentPath = path ?: ""
+        )
+    }
+
+    override fun initRoot() = launchWork {
+        actualState.copy(
+            listFiles = getFiles(),
+            currentPath = getInitialPath()
+        )
+    }
+
+    override fun backAction() = launchWork {
+        val currentPath = actualState.currentPath
+        val newPath = currentPath.split("/").toList().dropLast(1).joinToString("/")
+
+        val result = getFiles(newPath)
+        actualState.copy(
+            listFiles = result,
+            depthNumber = actualState.depthNumber - 1,
+            currentPath = newPath,
+        )
+    }
+
+    override fun onCleared() {
+        this.context.cancelChildren()
+    }
+
+    override fun setInitState(listFiles: List<FileDomain>, depthNumber: Long, currentPath: String) = launchWork {
+        actualState.copy(
+            listFiles = listFiles,
+            currentPath = currentPath,
+            depthNumber = depthNumber
+        )
+    }
+}

@@ -1,0 +1,93 @@
+[versions]
+#gradle
+gradleBuildToolsVersion = "8.0.2"
+
+#kotlin
+kotlinGradlePluginVersion = "1.8.21"
+kotlinCoroutines = "1.7.1"
+
+#core
+coreCtxVersion = "1.10.1"
+
+#lifecycle
+lifecycleRuntimeKtxVersion = "2.4.1"
+lifecycleViewModelVersion = "2.6.1"
+lifecycleComposeViewModelVersion = "2.5.0"
+
+#compose
+composeActivityVersion = "1.7.2"
+composeVersion = "1.4.7"
+composeBom = "2023.06.01"
+composeCustomViewVersion = "1.2.0-alpha02"
+composePoolingContainerVersion = "1.0.0"
+composeNavigationVersion = "2.6.0"
+constraintLayoutVersion = "1.0.1"
+
+#dagger
+daggerVersion = "2.46.1"
+
+securityCrypto = "1.1.0-alpha06"
+
+appCompat = "1.6.1"
+androidMaterial = "1.9.0"
+
+#tests
+junit = "4.13.2"
+junitExt = "1.1.5"
+espresso = "3.5.1"
+
+[libraries]
+#Gradle
+toolsBuildGradle = { group = "com.android.tools.build", name = "gradle", version.ref = "gradleBuildToolsVersion" }
+
+#Kotlin
+kotlinGradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlinGradlePluginVersion" }
+kotlinCoroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinCoroutines" }
+
+#Core
+coreKtx = { group = "androidx.core", name = "core-ktx", version.ref = "coreCtxVersion" }
+
+#Lifecycle
+lifecycleRuntimeKtx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }
+lifecycleViewModel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewModelVersion" }
+lifecycleViewModelSavedState = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-savedstate", version.ref = "lifecycleViewModelVersion" }
+lifecycleComposeViewModel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycleComposeViewModelVersion" }
+
+#Android
+appCompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appCompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "androidMaterial" }
+
+#Compose
+composeBom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+activityCompose = { group = "androidx.activity", name = "activity-compose", version.ref = "composeActivityVersion" }
+
+ui = { group = "androidx.compose.ui", name = "ui" }
+uiGraphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+uiTooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+uiToolingPreview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+material3 = { group = "androidx.compose.material3", name = "material3" }
+uiTestJunit = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+uiTestManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+materialCompose = { group = "androidx.compose.material", name = "material" }
+composeNavigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "composeNavigationVersion" }
+
+constraintLayout = { group = "androidx.constraintlayout", name = "constraintlayout-compose", version.ref = "constraintLayoutVersion" }
+customView = { group = "androidx.customview", name = "customview", version.ref = "composeCustomViewVersion" }
+poolingContainer = { group = "androidx.customview", name = "customview-poolingcontainer", version.ref = "composePoolingContainerVersion" }
+
+#Test
+testJunit = { group = "junit", name = "junit", version.ref = "junit" }
+testJunitExt = { group = "androidx.test.ext", name = "junit", version.ref = "junitExt" }
+espresso = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+
+#Dagger
+dagger = { group = "com.google.dagger", name = "dagger", version.ref = "daggerVersion" }
+daggerCompiler = { group = "com.google.dagger", name = "dagger-compiler", version.ref = "daggerVersion" }
+
+#Security
+securityCrypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+
+[bundles]
+compose = ["activityCompose", "ui", "uiGraphics", "uiTooling", "uiToolingPreview", "material3", "materialCompose", "composeNavigation", "constraintLayout", "customView", "poolingContainer"]
+android = ["appCompat", "material"]
+lifecycle = ["lifecycleRuntimeKtx", "lifecycleViewModel", "lifecycleViewModelSavedState", "lifecycleComposeViewModel"]
