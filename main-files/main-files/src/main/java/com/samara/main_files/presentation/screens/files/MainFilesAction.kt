@@ -1,10 +1,15 @@
 package com.samara.main_files.presentation.screens.files
 
+import android.net.Uri
 import com.samara.main_files_api.domain.models.FileDomain
 import presentation.base.Action
 
 sealed interface MainFilesAction : Action {
     data class OpenDir(
+        val path: String?
+    ): MainFilesAction
+
+    data class OpenFile(
         val path: String?
     ): MainFilesAction
 
@@ -16,4 +21,10 @@ sealed interface MainFilesAction : Action {
         val depthNumber: Long,
         val currentPath: String,
     ) : MainFilesAction
+}
+
+sealed interface MainFilesEffect {
+    data class OpenFile(
+        val path: Uri
+    ): MainFilesEffect
 }

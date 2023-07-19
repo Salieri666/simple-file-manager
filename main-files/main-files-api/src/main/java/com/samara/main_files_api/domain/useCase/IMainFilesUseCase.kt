@@ -1,5 +1,6 @@
 package com.samara.main_files_api.domain.useCase
 
+import android.net.Uri
 import com.samara.main_files_api.domain.models.FileDomain
 import kotlinx.coroutines.flow.StateFlow
 
@@ -26,4 +27,6 @@ interface IMainFilesUseCase {
         depthNumber: Long,
         currentPath: String
     )
+
+    fun convertPathToUri(path: String): Uri
 }

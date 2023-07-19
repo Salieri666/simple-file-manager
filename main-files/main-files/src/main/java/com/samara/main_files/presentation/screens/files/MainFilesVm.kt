@@ -52,6 +52,7 @@ class MainFilesVm @AssistedInject constructor(
             is MainFilesAction.OpenDir -> openDir(action)
             is MainFilesAction.BackAction -> back(action)
             is MainFilesAction.StateChangedAction -> stateChanged(action)
+            is MainFilesAction.OpenFile -> openFile(action)
             else -> super.reduce(action, state)
         }
     }
@@ -84,6 +85,18 @@ class MainFilesVm @AssistedInject constructor(
                 files = action.listFiles.map { it.toFileUI() },
                 currentPath = action.currentPath
             )
+        }
+    }
+
+    private fun openFile(action: MainFilesAction.OpenFile): Flow<MainFilesState> {
+        return action.ignoreState {
+            action.path?.let {
+                effect(
+                    MainFilesEffect.OpenFile(
+                        mainFilesUseCase.convertPathToUri(action.path)
+                    )
+                )
+            }
         }
     }
 

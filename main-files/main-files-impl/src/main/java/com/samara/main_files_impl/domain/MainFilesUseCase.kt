@@ -1,6 +1,9 @@
 package com.samara.main_files_impl.domain
 
+import android.content.Context
+import android.net.Uri
 import android.os.Parcelable
+import androidx.core.content.FileProvider
 import com.samara.main_files_api.data.IFilesRepo
 import com.samara.main_files_api.domain.models.FileDomain
 import com.samara.main_files_api.domain.useCase.IMainFilesUseCase
@@ -17,11 +20,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.parcelize.Parcelize
+import java.io.File
 import javax.inject.Inject
 
 
 class MainFilesUseCase @Inject constructor(
     private val filesRepo: IFilesRepo,
+    private val context: Context,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
 ) : IMainFilesUseCase {
 
@@ -44,8 +49,8 @@ class MainFilesUseCase @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val innerDispatcher = Dispatchers.IO.limitedParallelism(1)
-    private val context = innerDispatcher + SupervisorJob()
-    private val innerScope: CoroutineScope = CoroutineScope(context)
+    private val coroutineContext = innerDispatcher + SupervisorJob()
+    private val innerScope: CoroutineScope = CoroutineScope(coroutineContext)
 
     private fun launchWork(fileWork: suspend () -> FilesState) {
         innerScope.launch {
@@ -84,7 +89,7 @@ class MainFilesUseCase @Inject constructor(
 
     override fun backAction() = launchWork {
         val currentPath = actualState.currentPath
-        val newPath = currentPath.split("/").toList().dropLast(1).joinToString("/")
+        val newPath = currentPath.split(File.separator).toList().dropLast(1).joinToString(File.separator)
 
         val result = getFiles(newPath)
         actualState.copy(
@@ -95,7 +100,7 @@ class MainFilesUseCase @Inject constructor(
     }
 
     override fun onCleared() {
-        this.context.cancelChildren()
+        this.coroutineContext.cancelChildren()
     }
 
     override fun setInitState(listFiles: List<FileDomain>, depthNumber: Long, currentPath: String) = launchWork {
@@ -104,5 +109,9 @@ class MainFilesUseCase @Inject constructor(
             currentPath = currentPath,
             depthNumber = depthNumber
         )
+    }
+
+    override fun convertPathToUri(path: String): Uri {
+        return FileProvider.getUriForFile(context, context.applicationContext.packageName + ".provider", File(path));
     }
 }
