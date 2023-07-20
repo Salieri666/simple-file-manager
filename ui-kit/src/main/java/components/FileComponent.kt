@@ -16,10 +16,10 @@ fun FileComponent(
     title: String,
     modifier: Modifier = Modifier,
     isDir: Boolean = false,
-    onClick: (Boolean) -> Unit = {}
+    onClick: () -> Unit = {}
 ) {
     Row(modifier = modifier
-        .clickable { onClick(isDir) }
+        .clickable { onClick() }
         .padding(Dimens.enlargedPadding),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

@@ -62,7 +62,7 @@ class MainFilesUseCase @Inject constructor(
 
     private suspend fun getFiles(absolutePath: String? = null): List<FileDomain> = withContext(ioDispatcher) {
         val files = filesRepo.getFiles(absolutePath).map {
-            FileDomain(it.absolutePath, it.name, it.isDirectory)
+            FileDomain(it.absolutePath, it.name, it.isDirectory, it.extension)
         }
 
         return@withContext files.sortedWith(compareBy({ !it.isDir }, { it.title }))

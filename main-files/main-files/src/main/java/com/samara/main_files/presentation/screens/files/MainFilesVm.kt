@@ -93,7 +93,7 @@ class MainFilesVm @AssistedInject constructor(
             action.path?.let {
                 effect(
                     MainFilesEffect.OpenFile(
-                        mainFilesUseCase.convertPathToUri(action.path)
+                        mainFilesUseCase.convertPathToUri(action.path), action.ext
                     )
                 )
             }

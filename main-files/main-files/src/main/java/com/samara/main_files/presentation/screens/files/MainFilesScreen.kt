@@ -11,6 +11,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.samara.main_files.presentation.mappers.FileExtensions
 import com.samara.main_files.presentation.models.FileUi
 import com.samara.main_files.presentation.navigation.IMainFilesNavigation
 import components.FileComponent
@@ -34,7 +35,8 @@ fun MainFilesScreen(
         vm.effects.collect { e ->
             when (e) {
                 is MainFilesEffect.OpenFile -> {
-                    context.openFile(e.path, "application/pdf")
+                    if (e != FileExtensions.UNKNOWN)
+                        context.openFile(e.path, e.ext.mime)
                 }
             }
         }
@@ -49,9 +51,9 @@ fun MainFilesScreen(
     MainFilesScreen(
         files = state.files,
         modifier = modifier,
-        onClick = { isDir, path ->
-            if (isDir) vm.dispatch(MainFilesAction.OpenDir(path))
-            else vm.dispatch(MainFilesAction.OpenFile(path))
+        onClick = { file ->
+            if (file.isDir) vm.dispatch(MainFilesAction.OpenDir(file.absolutePath))
+            else vm.dispatch(MainFilesAction.OpenFile(file.absolutePath, file.ext))
         }
     )
 }
@@ -60,7 +62,7 @@ fun MainFilesScreen(
 fun MainFilesScreen(
     files: List<FileUi>,
     modifier: Modifier = Modifier,
-    onClick: (Boolean, String) -> Unit
+    onClick: (FileUi) -> Unit
 ) {
     if (files.isEmpty()) {
         Text(text = "Folder is empty")
@@ -76,7 +78,7 @@ fun MainFilesScreen(
                         title = title,
                         isDir = isDir,
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { isDir -> onClick(isDir, it.absolutePath) }
+                        onClick = { onClick(it) }
                     )
                 }
             }

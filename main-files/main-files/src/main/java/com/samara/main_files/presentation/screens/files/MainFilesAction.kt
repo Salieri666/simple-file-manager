@@ -1,6 +1,7 @@
 package com.samara.main_files.presentation.screens.files
 
 import android.net.Uri
+import com.samara.main_files.presentation.mappers.FileExtensions
 import com.samara.main_files_api.domain.models.FileDomain
 import presentation.base.Action
 
@@ -10,7 +11,8 @@ sealed interface MainFilesAction : Action {
     ): MainFilesAction
 
     data class OpenFile(
-        val path: String?
+        val path: String?,
+        val ext: FileExtensions
     ): MainFilesAction
 
     object InitRoot : MainFilesAction
@@ -25,6 +27,7 @@ sealed interface MainFilesAction : Action {
 
 sealed interface MainFilesEffect {
     data class OpenFile(
-        val path: Uri
+        val path: Uri,
+        val ext: FileExtensions
     ): MainFilesEffect
 }

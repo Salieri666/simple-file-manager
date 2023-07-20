@@ -7,5 +7,6 @@ import kotlinx.parcelize.Parcelize
 data class FileDomain(
     val absolutePath: String,
     val title: String,
-    val isDir: Boolean
+    val isDir: Boolean,
+    val fileExtension: String
 ): Parcelable
