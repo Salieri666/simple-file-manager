@@ -34,7 +34,8 @@ class MainFilesUseCase @Inject constructor(
     data class FilesState(
         override val listFiles: List<FileDomain> = emptyList(),
         override val depthNumber: Long = 0L,
-        override val currentPath: String = ""
+        override val currentPath: String = "",
+        override val loading: Boolean = false
     ) : IMainFilesUseCase.State, Parcelable
 
     private val _filesState: MutableStateFlow<IMainFilesUseCase.State> = MutableStateFlow(
@@ -83,7 +84,8 @@ class MainFilesUseCase @Inject constructor(
     override fun initRoot() = launchWork {
         actualState.copy(
             listFiles = getFiles(),
-            currentPath = getInitialPath()
+            currentPath = getInitialPath(),
+            loading = false
         )
     }
 
@@ -103,11 +105,17 @@ class MainFilesUseCase @Inject constructor(
         this.coroutineContext.cancelChildren()
     }
 
-    override fun setInitState(listFiles: List<FileDomain>, depthNumber: Long, currentPath: String) = launchWork {
+    override fun setInitState(
+        listFiles: List<FileDomain>,
+        depthNumber: Long,
+        currentPath: String,
+        loading: Boolean
+    ) = launchWork {
         actualState.copy(
             listFiles = listFiles,
             currentPath = currentPath,
-            depthNumber = depthNumber
+            depthNumber = depthNumber,
+            loading = loading
         )
     }
 

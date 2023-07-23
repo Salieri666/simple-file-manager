@@ -16,6 +16,7 @@ import com.samara.main_files.presentation.models.FileUi
 import com.samara.main_files.presentation.navigation.IMainFilesNavigation
 import components.FileComponent
 import extensions.openFile
+import models.UiState
 
 @Composable
 fun MainFilesScreen(
@@ -50,6 +51,7 @@ fun MainFilesScreen(
 
     MainFilesScreen(
         files = state.files,
+        uiState = state.uiState,
         modifier = modifier,
         onClick = { file ->
             if (file.isDir) vm.dispatch(MainFilesAction.OpenDir(file.absolutePath))
@@ -61,28 +63,35 @@ fun MainFilesScreen(
 @Composable
 fun MainFilesScreen(
     files: List<FileUi>,
+    uiState: UiState,
     modifier: Modifier = Modifier,
     onClick: (FileUi) -> Unit
 ) {
-    if (files.isEmpty()) {
-        Text(text = "Folder is empty")
-    } else {
 
-        LazyColumn(
-            modifier = modifier
-        ) {
+    when (uiState) {
+        UiState.Success ->
+            if (files.isEmpty()) {
+                Text(text = "Folder is empty")
+            } else {
 
-            items(files, key = { it.absolutePath }) {
-                it.apply {
-                    FileComponent(
-                        title = title,
-                        isDir = isDir,
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = { onClick(it) }
-                    )
+                LazyColumn(
+                    modifier = modifier
+                ) {
+
+                    items(files, key = { it.absolutePath }) {
+                        it.apply {
+                            FileComponent(
+                                title = title,
+                                isDir = isDir,
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = { onClick(it) }
+                            )
+                        }
+                    }
+
                 }
             }
 
-        }
+        else -> {}
     }
 }

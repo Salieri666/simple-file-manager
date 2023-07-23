@@ -22,6 +22,7 @@ sealed interface MainFilesAction : Action {
         val listFiles: List<FileDomain>,
         val depthNumber: Long,
         val currentPath: String,
+        val loading: Boolean,
     ) : MainFilesAction
 }
 

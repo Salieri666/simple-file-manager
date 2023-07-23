@@ -10,6 +10,7 @@ interface IMainFilesUseCase {
         val listFiles: List<FileDomain>
         val depthNumber: Long
         val currentPath: String
+        val loading: Boolean
     }
 
     val filesState: StateFlow<State>
@@ -25,7 +26,8 @@ interface IMainFilesUseCase {
     fun setInitState(
         listFiles: List<FileDomain>,
         depthNumber: Long,
-        currentPath: String
+        currentPath: String,
+        loading: Boolean
     )
 
     fun convertPathToUri(path: String): Uri

@@ -11,6 +11,8 @@ import dagger.assisted.AssistedInject
 import di.vm.ViewModelAssistedFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import models.UiState
+import models.UiState.Companion.isLoading
 import presentation.base.Action
 import presentation.base.StoreVM
 import presentation.base.change
@@ -30,7 +32,8 @@ class MainFilesVm @AssistedInject constructor(
         mainFilesUseCase.setInitState(
             listFiles = actualState.files.map { it.toFileDomain() },
             depthNumber = actualState.depthNumber,
-            currentPath = actualState.currentPath ?: ""
+            currentPath = actualState.currentPath ?: "",
+            loading = actualState.uiState.isLoading
         )
 
         viewModelScope.launch {
@@ -39,7 +42,8 @@ class MainFilesVm @AssistedInject constructor(
                     MainFilesAction.StateChangedAction(
                         listFiles = it.listFiles,
                         depthNumber = it.depthNumber,
-                        currentPath = it.currentPath
+                        currentPath = it.currentPath,
+                        loading = it.loading
                     )
                 )
             }
@@ -62,7 +66,9 @@ class MainFilesVm @AssistedInject constructor(
             if (!actualState.isInitialized)
                 mainFilesUseCase.initRoot()
 
-            it.copy(isInitialized = true)
+            it.copy(
+                isInitialized = true
+            )
         }
     }
 
@@ -83,7 +89,8 @@ class MainFilesVm @AssistedInject constructor(
             actualState.copy(
                 depthNumber = action.depthNumber,
                 files = action.listFiles.map { it.toFileUI() },
-                currentPath = action.currentPath
+                currentPath = action.currentPath,
+                uiState = if (!action.loading) UiState.Success else UiState.Loading
             )
         }
     }

@@ -62,9 +62,7 @@ fun MainActivityScreen(
                 Text(text = "Permissions is not granted")
             }
 
-            else -> {
-                Text(text = "Permissions unknown")
-            }
+            else -> {}
         }
 
     }
