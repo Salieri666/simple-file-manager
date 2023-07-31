@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text">Text</string>
+    <string name="video">Video</string>
+    <string name="audio">Audio</string>
+    <string name="image">Image</string>
+    <string name="pdf">Pdf</string>
+    <string name="word">Word</string>
+    <string name="unknown">Unknown</string>
+    <string name="excel">Excel</string>
+</resources>
