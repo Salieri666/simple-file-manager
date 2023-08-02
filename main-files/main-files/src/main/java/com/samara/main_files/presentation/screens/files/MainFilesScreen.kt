@@ -11,7 +11,6 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,7 +31,7 @@ import extensions.openFile
 import kotlinx.coroutines.launch
 import models.UiState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MainFilesScreen(
     vm: MainFilesVm,
@@ -75,8 +74,14 @@ fun MainFilesScreen(
 
 
 
-    BackHandler(state.depthNumber > 0) {
-        vm.dispatch(MainFilesAction.BackAction)
+    BackHandler(state.depthNumber > 0 || sheetState.isVisible) {
+        if (sheetState.isVisible) {
+            scope.launch {
+                sheetState.hide()
+            }
+        } else {
+            vm.dispatch(MainFilesAction.BackAction)
+        }
     }
 
 
@@ -99,8 +104,10 @@ fun MainFilesScreen(
             uiState = state.uiState,
             modifier = modifier,
             onClick = { file ->
-                if (file.isDir) vm.dispatch(MainFilesAction.OpenDir(file.absolutePath))
-                else vm.dispatch(MainFilesAction.OpenFile(file.absolutePath, file.ext))
+                vm.dispatch(MainFilesAction.ClickOnElement(file))
+            },
+            onLongClick = { file ->
+                vm.dispatch(MainFilesAction.ToEditMode(file))
             }
         )
     }
@@ -112,7 +119,8 @@ fun MainFilesScreen(
     files: List<FileUi>,
     uiState: UiState,
     modifier: Modifier = Modifier,
-    onClick: (FileUi) -> Unit
+    onClick: (FileUi) -> Unit,
+    onLongClick: (FileUi) -> Unit
 ) {
 
     when (uiState) {
@@ -130,8 +138,10 @@ fun MainFilesScreen(
                             FileComponent(
                                 title = title,
                                 isDir = isDir,
+                                isChecked = isChecked,
                                 modifier = Modifier.fillMaxWidth(),
-                                onClick = { onClick(it) }
+                                onClick = { onClick(it) },
+                                onLongClick = { onLongClick(it) }
                             )
                         }
                     }

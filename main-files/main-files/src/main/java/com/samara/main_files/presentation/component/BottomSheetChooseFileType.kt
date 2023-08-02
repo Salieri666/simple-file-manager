@@ -2,6 +2,7 @@ package com.samara.main_files.presentation.component
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,11 +32,13 @@ fun BottomSheetChooseFileType(
 /*                Icon(
                     Icons.Rounded.ShoppingCart, contentDescription = null
                 )*/
-                Text(
-                    stringResource(id = item.nameRes), modifier = Modifier
-                        .clickable {
-                            onClick(item)
-                        })
+                Box(modifier = Modifier.fillMaxWidth().clickable {
+                    onClick(item)}
+                    ) {
+                    Text(
+                        stringResource(id = item.nameRes))
+                }
+
             }
         }
     }

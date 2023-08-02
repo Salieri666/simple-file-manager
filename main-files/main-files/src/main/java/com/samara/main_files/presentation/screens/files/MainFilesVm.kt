@@ -53,10 +53,10 @@ class MainFilesVm @AssistedInject constructor(
     override fun reduce(action: Action, state: MainFilesState): Flow<MainFilesState> {
         return when (action) {
             is MainFilesAction.InitRoot -> initRoot(action)
-            is MainFilesAction.OpenDir -> openDir(action)
             is MainFilesAction.BackAction -> back(action)
             is MainFilesAction.StateChangedAction -> stateChanged(action)
-            is MainFilesAction.OpenFile -> openFile(action)
+            is MainFilesAction.ToEditMode -> toEditMode(action)
+            is MainFilesAction.ClickOnElement -> clickOnElement(action)
             else -> super.reduce(action, state)
         }
     }
@@ -72,15 +72,23 @@ class MainFilesVm @AssistedInject constructor(
         }
     }
 
-    private fun openDir(action: MainFilesAction.OpenDir): Flow<MainFilesState> {
+    private fun openDir(action: MainFilesAction.ClickOnElement): Flow<MainFilesState> {
         return action.ignoreState {
-            mainFilesUseCase.openDir(action.path)
+            mainFilesUseCase.openDir(action.file.absolutePath)
         }
     }
 
     private fun back(action: MainFilesAction.BackAction): Flow<MainFilesState> {
-        return action.ignoreState {
+        return actualState.change {
+            if (it.editMode) {
+                return@change it.copy(
+                    editMode = false,
+                    files = it.files.map { file -> file.copy(isChecked = false) }
+                )
+            }
+
             mainFilesUseCase.backAction()
+            return@change it
         }
     }
 
@@ -95,15 +103,51 @@ class MainFilesVm @AssistedInject constructor(
         }
     }
 
-    private fun openFile(action: MainFilesAction.OpenFile): Flow<MainFilesState> {
+    private fun openFile(action: MainFilesAction.ClickOnElement): Flow<MainFilesState> {
         return action.ignoreState {
-            action.path?.let {
+            action.file.absolutePath?.let {
                 effect(
                     MainFilesEffect.OpenFile(
-                        mainFilesUseCase.convertPathToUri(action.path), action.ext
+                        mainFilesUseCase.convertPathToUri(action.file.absolutePath), action.file.ext
                     )
                 )
             }
+        }
+    }
+
+    private fun toEditMode(action: MainFilesAction.ToEditMode): Flow<MainFilesState> {
+        return actualState.change {
+            it.copy(
+                editMode = true,
+                files = it.files.map { file ->
+                    if (file.absolutePath == action.file.absolutePath)
+                        file.copy(isChecked = !file.isChecked)
+                    else
+                        file
+                }
+            )
+        }
+    }
+
+    private fun clickOnElement(action: MainFilesAction.ClickOnElement): Flow<MainFilesState> {
+        return when {
+            actualState.editMode -> checkElement(action)
+            action.file.isDir -> openDir(action)
+            else -> openFile(action)
+        }
+    }
+
+    private fun checkElement(action: MainFilesAction.ClickOnElement): Flow<MainFilesState> {
+        return actualState.change {
+            it.copy(
+                editMode = true,
+                files = it.files.map { file ->
+                    if (file.absolutePath == action.file.absolutePath)
+                        file.copy(isChecked = true)
+                    else
+                        file
+                }
+            )
         }
     }
 

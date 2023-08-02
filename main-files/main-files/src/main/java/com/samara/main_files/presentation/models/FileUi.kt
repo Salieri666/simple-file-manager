@@ -10,5 +10,6 @@ data class FileUi(
     val title: String,
     val isDir: Boolean,
     val ext: FileExtensions,
-    val extStr: String
+    val extStr: String,
+    val isChecked: Boolean = false
 ): Parcelable
