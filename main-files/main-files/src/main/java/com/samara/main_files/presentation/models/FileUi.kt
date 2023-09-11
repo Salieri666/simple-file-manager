@@ -8,6 +8,8 @@ import kotlinx.parcelize.Parcelize
 data class FileUi(
     val absolutePath: String,
     val title: String,
+    val size: String,
+    val changedDate: String,
     val isDir: Boolean,
     val ext: FileExtensions,
     val extStr: String,

@@ -11,14 +11,18 @@ fun FileDomain.toFileUI() = FileUi(
     title = title,
     isDir = isDir,
     ext = convertStringExt(fileExtension),
-    extStr = fileExtension
+    extStr = fileExtension,
+    size = size,
+    changedDate = changedDate
 )
 
 fun FileUi.toFileDomain() = FileDomain(
     absolutePath = absolutePath,
     title = title,
     isDir = isDir,
-    fileExtension = extStr
+    fileExtension = extStr,
+    size = size,
+    changedDate = changedDate
 )
 
 enum class FileExtensions(

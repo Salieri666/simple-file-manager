@@ -2,13 +2,22 @@ package com.samara.main_files.presentation.screens.files
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -20,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.samara.main_files.presentation.component.BottomSheetChooseFileType
 import com.samara.main_files.presentation.mappers.FileExtensions
@@ -74,13 +85,19 @@ fun MainFilesScreen(
 
 
 
-    BackHandler(state.depthNumber > 0 || sheetState.isVisible) {
-        if (sheetState.isVisible) {
-            scope.launch {
-                sheetState.hide()
+    BackHandler(state.depthNumber > 0 || sheetState.isVisible || state.editMode) {
+        when {
+
+            sheetState.isVisible -> {
+                scope.launch {
+                    sheetState.hide()
+                }
             }
-        } else {
-            vm.dispatch(MainFilesAction.BackAction)
+
+            else -> {
+                vm.dispatch(MainFilesAction.BackAction)
+            }
+
         }
     }
 
@@ -102,6 +119,7 @@ fun MainFilesScreen(
         MainFilesScreen(
             files = state.files,
             uiState = state.uiState,
+            isEditMode = state.editMode,
             modifier = modifier,
             onClick = { file ->
                 vm.dispatch(MainFilesAction.ClickOnElement(file))
@@ -118,36 +136,65 @@ fun MainFilesScreen(
 fun MainFilesScreen(
     files: List<FileUi>,
     uiState: UiState,
+    isEditMode: Boolean,
     modifier: Modifier = Modifier,
     onClick: (FileUi) -> Unit,
     onLongClick: (FileUi) -> Unit
 ) {
 
     when (uiState) {
-        UiState.Success ->
+        UiState.Success -> {
             if (files.isEmpty()) {
                 Text(text = "Folder is empty")
             } else {
+                Scaffold(
+                    modifier = modifier,
+                    bottomBar = {
 
-                LazyColumn(
-                    modifier = modifier
-                ) {
+                        val density = LocalDensity.current
+                        AnimatedVisibility(
+                            visible = isEditMode,
+                            enter = slideInVertically() {
+                                with(density) { 40.dp.roundToPx() }
+                            } + fadeIn(),
+                            exit = slideOutVertically() {
+                                with(density) { 40.dp.roundToPx() }
+                            } + fadeOut()
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(80.dp)
+                                    .background(Color.Blue)
+                            ) {
 
-                    items(files, key = { it.absolutePath }) {
-                        it.apply {
-                            FileComponent(
-                                title = title,
-                                isDir = isDir,
-                                isChecked = isChecked,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { onClick(it) },
-                                onLongClick = { onLongClick(it) }
-                            )
+                            }
                         }
                     }
+                ) { paddingValues ->
+                    LazyColumn(modifier = Modifier.padding(paddingValues)) {
+
+                        items(files, key = { it.absolutePath }) {
+                            it.apply {
+                                FileComponent(
+                                    title = title,
+                                    isDir = isDir,
+                                    size = size,
+                                    changedDate = changedDate,
+                                    isChecked = isChecked,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { onClick(it) },
+                                    onLongClick = { onLongClick(it) }
+                                )
+                            }
+                        }
+
+                    }
+
 
                 }
             }
+        }
 
         else -> {}
     }

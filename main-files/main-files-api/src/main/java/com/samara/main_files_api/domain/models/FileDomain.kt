@@ -8,5 +8,7 @@ data class FileDomain(
     val absolutePath: String,
     val title: String,
     val isDir: Boolean,
-    val fileExtension: String
+    val fileExtension: String,
+    val size: String,
+    val changedDate: String
 ): Parcelable
