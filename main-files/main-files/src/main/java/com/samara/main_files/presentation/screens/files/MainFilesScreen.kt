@@ -2,15 +2,12 @@ package com.samara.main_files.presentation.screens.files
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.animation.with
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,10 +26,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.samara.main_files.presentation.component.BottomFileActions
 import com.samara.main_files.presentation.component.BottomSheetChooseFileType
 import com.samara.main_files.presentation.mappers.FileExtensions
 import com.samara.main_files.presentation.models.FileUi
@@ -132,6 +128,7 @@ fun MainFilesScreen(
 
 }
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun MainFilesScreen(
     files: List<FileUi>,
@@ -151,24 +148,17 @@ fun MainFilesScreen(
                     modifier = modifier,
                     bottomBar = {
 
-                        val density = LocalDensity.current
-                        AnimatedVisibility(
-                            visible = isEditMode,
-                            enter = slideInVertically() {
-                                with(density) { 40.dp.roundToPx() }
-                            } + fadeIn(),
-                            exit = slideOutVertically() {
-                                with(density) { 40.dp.roundToPx() }
-                            } + fadeOut()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(80.dp)
-                                    .background(Color.Blue)
-                            ) {
-
+                        AnimatedContent(
+                            targetState = isEditMode,
+                            transitionSpec = {
+                                slideInVertically { height -> height } with slideOutVertically { height -> height }
                             }
+                        ) { isVisible ->
+
+                            if (isVisible) {
+                                BottomFileActions(modifier = Modifier.fillMaxWidth())
+                            }
+
                         }
                     }
                 ) { paddingValues ->

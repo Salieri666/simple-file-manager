@@ -8,4 +8,9 @@
     <string name="word">Word</string>
     <string name="unknown">Unknown</string>
     <string name="excel">Excel</string>
+
+    <string name="move">Move</string>
+    <string name="delete">Delete</string>
+    <string name="rename">Rename</string>
+    <string name="details">Details</string>
 </resources>
