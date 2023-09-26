@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.samara.main_files.presentation.component.BottomFileActions
 import com.samara.main_files.presentation.component.BottomSheetChooseFileType
+import com.samara.main_files.presentation.component.TopBarComponent
 import com.samara.main_files.presentation.mappers.FileExtensions
 import com.samara.main_files.presentation.models.FileUi
 import com.samara.main_files.presentation.navigation.IMainFilesNavigation
@@ -116,12 +117,16 @@ fun MainFilesScreen(
             files = state.files,
             uiState = state.uiState,
             isEditMode = state.editMode,
+            selectedItemsText = state.selectedItemsText,
             modifier = modifier,
             onClick = { file ->
                 vm.dispatch(MainFilesAction.ClickOnElement(file))
             },
             onLongClick = { file ->
                 vm.dispatch(MainFilesAction.ToEditMode(file))
+            },
+            cancelClick = {
+                vm.dispatch(MainFilesAction.BackAction)
             }
         )
     }
@@ -134,9 +139,11 @@ fun MainFilesScreen(
     files: List<FileUi>,
     uiState: UiState,
     isEditMode: Boolean,
+    selectedItemsText: String,
     modifier: Modifier = Modifier,
     onClick: (FileUi) -> Unit,
-    onLongClick: (FileUi) -> Unit
+    onLongClick: (FileUi) -> Unit,
+    cancelClick: () -> Unit
 ) {
 
     when (uiState) {
@@ -146,6 +153,25 @@ fun MainFilesScreen(
             } else {
                 Scaffold(
                     modifier = modifier,
+                    topBar = {
+                        AnimatedContent(
+                            targetState = isEditMode,
+                            transitionSpec = {
+                                slideInVertically() with slideOutVertically()
+                            }
+                        ) { isVisible ->
+
+                            if (isVisible) {
+                                TopBarComponent(
+                                    titleString = selectedItemsText,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onCancelClick = {
+                                        cancelClick()
+                                    })
+                            }
+
+                        }
+                    },
                     bottomBar = {
 
                         AnimatedContent(
@@ -154,11 +180,13 @@ fun MainFilesScreen(
                                 slideInVertically { height -> height } with slideOutVertically { height -> height }
                             }
                         ) { isVisible ->
-
                             if (isVisible) {
-                                BottomFileActions(modifier = Modifier.fillMaxWidth())
-                            }
+                                BottomFileActions(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClickItem = {
 
+                                    })
+                            }
                         }
                     }
                 ) { paddingValues ->

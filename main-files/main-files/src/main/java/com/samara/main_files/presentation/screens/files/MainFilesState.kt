@@ -14,7 +14,8 @@ data class MainFilesState(
     val currentPath: String? = "",
     val files: List<FileUi> = listOf(),
     val nameTypeFilesList: List<FileExtensions> = getNameTypeFilesList(),
-    val editMode: Boolean = false
+    val editMode: Boolean = false,
+    val selectedItemsText: String = ""
 ) : State
 
 fun getNameTypeFilesList(): List<FileExtensions> {

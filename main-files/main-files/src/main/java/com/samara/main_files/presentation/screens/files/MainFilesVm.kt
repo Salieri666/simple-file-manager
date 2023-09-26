@@ -2,12 +2,14 @@ package com.samara.main_files.presentation.screens.files
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.samara.main_files.R
 import com.samara.main_files.presentation.mappers.toFileDomain
 import com.samara.main_files.presentation.mappers.toFileUI
 import com.samara.main_files_api.domain.useCase.IMainFilesUseCase
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import data.resourceProvider.IResourceProvider
 import di.vm.ViewModelAssistedFactory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -19,6 +21,7 @@ import presentation.base.change
 
 class MainFilesVm @AssistedInject constructor(
     private val mainFilesUseCase: IMainFilesUseCase,
+    private val resourceProvider: IResourceProvider,
     @Assisted savedStateHandle: SavedStateHandle
 ) : StoreVM<MainFilesState>(savedStateHandle) {
 
@@ -117,14 +120,20 @@ class MainFilesVm @AssistedInject constructor(
 
     private fun toEditMode(action: MainFilesAction.ToEditMode): Flow<MainFilesState> {
         return actualState.change {
+            val newFiles =  it.files.map { file ->
+                if (file.absolutePath == action.file.absolutePath)
+                    file.copy(isChecked = !file.isChecked)
+                else
+                    file
+            }
+
+            val selectedItemsSize = newFiles.filter { el -> el.isChecked }.size
+            val selectedItemsText = resourceProvider.getQuantityString(R.plurals.selectedItems, selectedItemsSize, selectedItemsSize)
+
             it.copy(
                 editMode = true,
-                files = it.files.map { file ->
-                    if (file.absolutePath == action.file.absolutePath)
-                        file.copy(isChecked = !file.isChecked)
-                    else
-                        file
-                }
+                files = newFiles,
+                selectedItemsText = selectedItemsText
             )
         }
     }
@@ -139,14 +148,20 @@ class MainFilesVm @AssistedInject constructor(
 
     private fun checkElement(action: MainFilesAction.ClickOnElement): Flow<MainFilesState> {
         return actualState.change {
+            val newFiles =  it.files.map { file ->
+                if (file.absolutePath == action.file.absolutePath)
+                    file.copy(isChecked = true)
+                else
+                    file
+            }
+
+            val selectedItemsSize = newFiles.filter { el -> el.isChecked }.size
+            val selectedItemsText = resourceProvider.getQuantityString(R.plurals.selectedItems, selectedItemsSize, selectedItemsSize)
+
             it.copy(
                 editMode = true,
-                files = it.files.map { file ->
-                    if (file.absolutePath == action.file.absolutePath)
-                        file.copy(isChecked = true)
-                    else
-                        file
-                }
+                files = newFiles,
+                selectedItemsText = selectedItemsText
             )
         }
     }

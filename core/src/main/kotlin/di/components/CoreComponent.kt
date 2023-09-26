@@ -3,6 +3,7 @@ package di.components
 import android.content.Context
 import dagger.Component
 import data.pref.IPrefsStorage
+import data.resourceProvider.IResourceProvider
 import di.modules.CoreModule
 import di.modules.DefaultDispatcher
 import di.modules.DispatcherModule
@@ -21,6 +22,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 interface CoreComponent {
     fun provideContext(): Context
     fun providePrefsStorage(): IPrefsStorage
+
+    fun provideResourceProvider(): IResourceProvider
 
     @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher

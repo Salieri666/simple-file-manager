@@ -2,6 +2,7 @@ package com.samara.main_files.presentation.component
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +24,8 @@ import theme.Dimens
 
 @Composable
 fun BottomFileActions(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClickItem: (BottomFileActionType) -> Unit = {}
 ) {
     Column {
         Divider(thickness = 1.dp, color = Color.Black)
@@ -32,19 +34,27 @@ fun BottomFileActions(
             modifier = modifier,
             horizontalArrangement = Arrangement.Center
         ) {
-            BottomFileAction(R.drawable.move, R.string.move)
-            BottomFileAction(R.drawable.delete, R.string.delete)
-            BottomFileAction(R.drawable.text_field, R.string.rename)
-            BottomFileAction(R.drawable.detail, R.string.details)
+            BottomFileAction(R.drawable.move, R.string.move, onClick = { onClickItem(BottomFileActionType.MOVE) })
+            BottomFileAction(R.drawable.delete, R.string.delete, onClick = { onClickItem(BottomFileActionType.DELETE) })
+            BottomFileAction(R.drawable.text_field, R.string.rename, onClick = { onClickItem(BottomFileActionType.RENAME) })
+            BottomFileAction(R.drawable.detail, R.string.details, onClick = { onClickItem(BottomFileActionType.DETAIL) })
         }
     }
 
 }
 
 @Composable
-private fun BottomFileAction(@DrawableRes iconId: Int, @StringRes iconTextId: Int) {
+private fun BottomFileAction(
+    @DrawableRes iconId: Int,
+    @StringRes iconTextId: Int,
+    onClick: () -> Unit = {},
+) {
     Column(
-        modifier = Modifier.padding(Dimens.mediumPadding),
+        modifier = Modifier
+            .padding(Dimens.mediumPadding)
+            .clickable {
+                onClick()
+            },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
@@ -61,4 +71,8 @@ private fun BottomFileAction(@DrawableRes iconId: Int, @StringRes iconTextId: In
 @Composable
 fun BottomFileActionsPreview() {
     BottomFileActions(modifier = Modifier.fillMaxWidth())
+}
+
+enum class BottomFileActionType {
+    MOVE, DELETE, RENAME, DETAIL
 }

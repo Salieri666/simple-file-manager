@@ -13,4 +13,10 @@
     <string name="delete">Delete</string>
     <string name="rename">Rename</string>
     <string name="details">Details</string>
+    <string name="cancel">Cancel</string>
+
+    <plurals name="selectedItems">
+        <item quantity="one">Selected %d item</item>
+        <item quantity="other">Selected %d items</item>
+    </plurals>
 </resources>
