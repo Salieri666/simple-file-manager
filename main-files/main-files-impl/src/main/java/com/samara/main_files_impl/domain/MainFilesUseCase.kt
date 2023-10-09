@@ -90,6 +90,7 @@ class MainFilesUseCase @Inject constructor(
                 it.isDirectory,
                 it.extension,
                 size = if (it.isDirectory) filesInDirectory else sizeString,
+                sizeBytes = attr.size(),
                 changedDate = changedTimeString
             )
         }
@@ -151,7 +152,7 @@ class MainFilesUseCase @Inject constructor(
         return FileProvider.getUriForFile(context, context.applicationContext.packageName + ".provider", File(path));
     }
 
-    private fun humanReadableByteCountBin(bytes: Long): String {
+    override fun humanReadableByteCountBin(bytes: Long): String {
         val absB = if (bytes == Long.MIN_VALUE) Long.MAX_VALUE else Math.abs(bytes)
         if (absB < 1024) {
             return "$bytes B"
@@ -168,4 +169,48 @@ class MainFilesUseCase @Inject constructor(
         return String.format("%.1f %ciB", value / 1024.0, ci.current())
     }
 
+    override fun delete(listFiles: List<FileDomain>) = launchWork {
+        filesRepo.deleteFiles(listFiles.map { it.absolutePath })
+
+        val result = getFiles(actualState.currentPath)
+
+        actualState.copy(
+            listFiles = result,
+            depthNumber = actualState.depthNumber + 1,
+            currentPath = actualState.currentPath
+        )
+    }
+
+    override fun checkTitleFile(title: String): Boolean {
+        if (title.length >= 60) return false;
+
+        for (c: Char in title) {
+            if (!checkIsValidChar(c))
+                return false
+        }
+
+        return true;
+    }
+
+    private fun checkIsValidChar(c: Char): Boolean {
+        if ((0x00.toChar() <= c && c <= 0x1f.toChar())) {
+            return false;
+        }
+
+        return when(c) {
+            '"', '*', '/', ':', '<', '>', '?', '\\', '|', '[', ']', 0x7F.toChar() -> false
+            else -> true
+        }
+    }
+
+    override fun renameFile(newTitle: String, path: String) = launchWork {
+        filesRepo.renameFile(newTitle, path)
+        val result = getFiles(actualState.currentPath)
+
+        actualState.copy(
+            listFiles = result,
+            depthNumber = actualState.depthNumber,
+            currentPath = actualState.currentPath ?: ""
+        )
+    }
 }

@@ -28,8 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.samara.main_files.presentation.component.BottomFileActionType
 import com.samara.main_files.presentation.component.BottomFileActions
 import com.samara.main_files.presentation.component.BottomSheetChooseFileType
+import com.samara.main_files.presentation.component.DetailDialog
+import com.samara.main_files.presentation.component.RenameDialog
 import com.samara.main_files.presentation.component.TopBarComponent
 import com.samara.main_files.presentation.mappers.FileExtensions
 import com.samara.main_files.presentation.models.FileUi
@@ -113,6 +116,20 @@ fun MainFilesScreen(
             }
         )
     }) {
+        if (state.openDialogDetails) {
+            DetailDialog(counts = state.countsDialogDetails, size = state.size, lastChanged = state.lastChanged,
+                onConfirmation = {
+                    vm.dispatch(MainFilesAction.CloseDialog)
+                })
+        }
+
+        if (state.openRenameDialog) {
+            RenameDialog(title = state.textForRename, onConfirm = {
+                vm.dispatch(MainFilesAction.RenameItemAction(it))
+            }, onDismiss = {vm.dispatch(MainFilesAction.CloseDialog)})
+        }
+
+
         MainFilesScreen(
             files = state.files,
             uiState = state.uiState,
@@ -127,6 +144,9 @@ fun MainFilesScreen(
             },
             cancelClick = {
                 vm.dispatch(MainFilesAction.BackAction)
+            },
+            bottomActionsClick = { action ->
+                vm.dispatch(MainFilesAction.ClickOnBottomActions(action))
             }
         )
     }
@@ -143,7 +163,8 @@ fun MainFilesScreen(
     modifier: Modifier = Modifier,
     onClick: (FileUi) -> Unit,
     onLongClick: (FileUi) -> Unit,
-    cancelClick: () -> Unit
+    cancelClick: () -> Unit,
+    bottomActionsClick: (BottomFileActionType) -> Unit = {}
 ) {
 
     when (uiState) {
@@ -158,7 +179,7 @@ fun MainFilesScreen(
                             targetState = isEditMode,
                             transitionSpec = {
                                 slideInVertically() with slideOutVertically()
-                            }
+                            }, label = "TopBarAnimation"
                         ) { isVisible ->
 
                             if (isVisible) {
@@ -173,19 +194,19 @@ fun MainFilesScreen(
                         }
                     },
                     bottomBar = {
-
                         AnimatedContent(
                             targetState = isEditMode,
                             transitionSpec = {
                                 slideInVertically { height -> height } with slideOutVertically { height -> height }
-                            }
+                            }, label = "BottomBarAnimation"
                         ) { isVisible ->
                             if (isVisible) {
                                 BottomFileActions(
                                     modifier = Modifier.fillMaxWidth(),
                                     onClickItem = {
-
-                                    })
+                                        bottomActionsClick(it)
+                                    }
+                                )
                             }
                         }
                     }

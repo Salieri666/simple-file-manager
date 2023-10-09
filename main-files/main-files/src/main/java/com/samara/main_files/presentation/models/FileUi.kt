@@ -9,6 +9,7 @@ data class FileUi(
     val absolutePath: String,
     val title: String,
     val size: String,
+    val sizeBytes: Long,
     val changedDate: String,
     val isDir: Boolean,
     val ext: FileExtensions,

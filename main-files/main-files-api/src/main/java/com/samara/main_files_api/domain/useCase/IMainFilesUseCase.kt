@@ -31,4 +31,11 @@ interface IMainFilesUseCase {
     )
 
     fun convertPathToUri(path: String): Uri
+    fun humanReadableByteCountBin(bytes: Long): String
+
+    fun delete(listFiles: List<FileDomain>)
+
+    fun checkTitleFile(title: String): Boolean
+
+    fun renameFile(newTitle: String, path: String)
 }

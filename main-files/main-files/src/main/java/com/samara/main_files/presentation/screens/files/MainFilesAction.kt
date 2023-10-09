@@ -1,6 +1,7 @@
 package com.samara.main_files.presentation.screens.files
 
 import android.net.Uri
+import com.samara.main_files.presentation.component.BottomFileActionType
 import com.samara.main_files.presentation.mappers.FileExtensions
 import com.samara.main_files.presentation.models.FileUi
 import com.samara.main_files_api.domain.models.FileDomain
@@ -23,6 +24,16 @@ sealed interface MainFilesAction : Action {
 
     data class ClickOnElement(
         val file: FileUi
+    ) : MainFilesAction
+
+    data class ClickOnBottomActions(
+        val action: BottomFileActionType
+    ) : MainFilesAction
+
+    object CloseDialog : MainFilesAction
+
+    data class RenameItemAction(
+        val title: String
     ) : MainFilesAction
 }
 

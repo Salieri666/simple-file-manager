@@ -10,5 +10,6 @@ data class FileDomain(
     val isDir: Boolean,
     val fileExtension: String,
     val size: String,
+    val sizeBytes: Long,
     val changedDate: String
 ): Parcelable

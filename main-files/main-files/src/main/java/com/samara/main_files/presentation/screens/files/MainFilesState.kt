@@ -15,7 +15,13 @@ data class MainFilesState(
     val files: List<FileUi> = listOf(),
     val nameTypeFilesList: List<FileExtensions> = getNameTypeFilesList(),
     val editMode: Boolean = false,
-    val selectedItemsText: String = ""
+    val selectedItemsText: String = "",
+    val openDialogDetails: Boolean = false,
+    val openRenameDialog: Boolean = false,
+    val textForRename: String = "",
+    val countsDialogDetails: Int = 0,
+    val size: String = "",
+    val lastChanged: String = ""
 ) : State
 
 fun getNameTypeFilesList(): List<FileExtensions> {

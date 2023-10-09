@@ -3,6 +3,7 @@ package com.samara.main_files.presentation.screens.files
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.samara.main_files.R
+import com.samara.main_files.presentation.component.BottomFileActionType
 import com.samara.main_files.presentation.mappers.toFileDomain
 import com.samara.main_files.presentation.mappers.toFileUI
 import com.samara.main_files_api.domain.useCase.IMainFilesUseCase
@@ -60,6 +61,9 @@ class MainFilesVm @AssistedInject constructor(
             is MainFilesAction.StateChangedAction -> stateChanged(action)
             is MainFilesAction.ToEditMode -> toEditMode(action)
             is MainFilesAction.ClickOnElement -> clickOnElement(action)
+            is MainFilesAction.ClickOnBottomActions -> clickOnBottomActions(action)
+            is MainFilesAction.CloseDialog -> closeDialog(action)
+            is MainFilesAction.RenameItemAction -> renameItem(action)
             else -> super.reduce(action, state)
         }
     }
@@ -120,7 +124,7 @@ class MainFilesVm @AssistedInject constructor(
 
     private fun toEditMode(action: MainFilesAction.ToEditMode): Flow<MainFilesState> {
         return actualState.change {
-            val newFiles =  it.files.map { file ->
+            val newFiles = it.files.map { file ->
                 if (file.absolutePath == action.file.absolutePath)
                     file.copy(isChecked = !file.isChecked)
                 else
@@ -128,7 +132,11 @@ class MainFilesVm @AssistedInject constructor(
             }
 
             val selectedItemsSize = newFiles.filter { el -> el.isChecked }.size
-            val selectedItemsText = resourceProvider.getQuantityString(R.plurals.selectedItems, selectedItemsSize, selectedItemsSize)
+            val selectedItemsText = resourceProvider.getQuantityString(
+                R.plurals.selectedItems,
+                selectedItemsSize,
+                selectedItemsSize
+            )
 
             it.copy(
                 editMode = true,
@@ -148,7 +156,7 @@ class MainFilesVm @AssistedInject constructor(
 
     private fun checkElement(action: MainFilesAction.ClickOnElement): Flow<MainFilesState> {
         return actualState.change {
-            val newFiles =  it.files.map { file ->
+            val newFiles = it.files.map { file ->
                 if (file.absolutePath == action.file.absolutePath)
                     file.copy(isChecked = true)
                 else
@@ -156,13 +164,88 @@ class MainFilesVm @AssistedInject constructor(
             }
 
             val selectedItemsSize = newFiles.filter { el -> el.isChecked }.size
-            val selectedItemsText = resourceProvider.getQuantityString(R.plurals.selectedItems, selectedItemsSize, selectedItemsSize)
+            val selectedItemsText = resourceProvider.getQuantityString(
+                R.plurals.selectedItems,
+                selectedItemsSize,
+                selectedItemsSize
+            )
 
             it.copy(
                 editMode = true,
                 files = newFiles,
                 selectedItemsText = selectedItemsText
             )
+        }
+    }
+
+    private fun clickOnBottomActions(action: MainFilesAction.ClickOnBottomActions): Flow<MainFilesState> {
+        val currentCheckedElements = actualState.files.filter { el -> el.isChecked }
+
+        return actualState.change {
+
+            when (action.action) {
+                BottomFileActionType.MOVE -> {
+
+                }
+
+                BottomFileActionType.DELETE -> {
+                    mainFilesUseCase.delete(it.files.filter { el -> el.isChecked }
+                        .map { el -> el.toFileDomain() })
+                    return@change it.copy(
+                        editMode = false,
+                        files = actualState.files.filter { el -> !el.isChecked })
+                }
+
+                BottomFileActionType.DETAIL -> {
+                    return@change it.copy(
+                        openDialogDetails = true,
+                        countsDialogDetails = currentCheckedElements.size,
+                        lastChanged = if (currentCheckedElements.size == 1) currentCheckedElements[0].changedDate else "",
+                        size = mainFilesUseCase.humanReadableByteCountBin(currentCheckedElements.sumOf { fileUi -> fileUi.sizeBytes })
+                    )
+                }
+
+                BottomFileActionType.RENAME -> {
+                    return@change if (currentCheckedElements.size == 1) {
+                        it.copy(
+                            openRenameDialog = true,
+                            textForRename = currentCheckedElements[0].title
+                        )
+                    } else it
+                }
+            }
+
+            it
+        }
+
+    }
+
+    private fun closeDialog(action: MainFilesAction.CloseDialog): Flow<MainFilesState> =
+        actualState.change {
+            it.copy(openDialogDetails = false, openRenameDialog = false)
+        }
+
+    private fun renameItem(action: MainFilesAction.RenameItemAction): Flow<MainFilesState> {
+        if (!mainFilesUseCase.checkTitleFile(action.title)) {
+            return actualState.change {
+                it
+            }
+        }
+
+        //check on duplicate
+
+        if (actualState.files.any { it.title == action.title }) {
+            return actualState.change {
+                it
+            }
+        }
+
+        return actualState.change { filesState ->
+            mainFilesUseCase.renameFile(action.title, actualState.files.first {
+                it.isChecked
+            }.absolutePath)
+
+            filesState.copy(openRenameDialog = false, editMode = false)
         }
     }
 

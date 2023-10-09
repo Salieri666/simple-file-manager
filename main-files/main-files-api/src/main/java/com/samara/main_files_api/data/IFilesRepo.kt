@@ -7,5 +7,7 @@ interface IFilesRepo {
 
     suspend fun getInitialPath(): String
 
-    //suspend fun getFileSeparator(): String = File.separator
+    suspend fun deleteFiles(paths: List<String>)
+
+    suspend fun renameFile(newTitle: String, path: String)
 }
