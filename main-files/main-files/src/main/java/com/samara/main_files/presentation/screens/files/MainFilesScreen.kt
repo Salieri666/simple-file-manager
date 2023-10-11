@@ -124,9 +124,13 @@ fun MainFilesScreen(
         }
 
         if (state.openRenameDialog) {
-            RenameDialog(title = state.textForRename, onConfirm = {
-                vm.dispatch(MainFilesAction.RenameItemAction(it))
-            }, onDismiss = {vm.dispatch(MainFilesAction.CloseDialog)})
+            RenameDialog(
+                title = state.textForRename,
+                onConfirm = { vm.dispatch(MainFilesAction.RenameItemAction(it)) },
+                onDismiss = { vm.dispatch(MainFilesAction.CloseDialog) },
+                showDuplicateMsg = state.showDuplicateMsg,
+                showInvalidTitle = state.showInvalidTitle
+            )
         }
 
 

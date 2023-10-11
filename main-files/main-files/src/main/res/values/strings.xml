@@ -21,6 +21,9 @@
 
     <string name="ok">OK</string>
 
+    <string name="duplicateTitle">File with the same title already exists!</string>
+    <string name="invalidTitle">Title is too long or contains invalid characters</string>
+
     <plurals name="selectedItems">
         <item quantity="one">Selected %d item</item>
         <item quantity="other">Selected %d items</item>

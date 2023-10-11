@@ -21,7 +21,9 @@ data class MainFilesState(
     val textForRename: String = "",
     val countsDialogDetails: Int = 0,
     val size: String = "",
-    val lastChanged: String = ""
+    val lastChanged: String = "",
+    val showInvalidTitle: Boolean = false,
+    val showDuplicateMsg: Boolean = false,
 ) : State
 
 fun getNameTypeFilesList(): List<FileExtensions> {

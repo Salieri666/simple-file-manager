@@ -123,6 +123,8 @@ class MainFilesVm @AssistedInject constructor(
     }
 
     private fun toEditMode(action: MainFilesAction.ToEditMode): Flow<MainFilesState> {
+        if (actualState.editMode) return action.ignoreState()
+
         return actualState.change {
             val newFiles = it.files.map { file ->
                 if (file.absolutePath == action.file.absolutePath)
@@ -158,7 +160,7 @@ class MainFilesVm @AssistedInject constructor(
         return actualState.change {
             val newFiles = it.files.map { file ->
                 if (file.absolutePath == action.file.absolutePath)
-                    file.copy(isChecked = true)
+                    file.copy(isChecked = !file.isChecked)
                 else
                     file
             }
@@ -222,13 +224,17 @@ class MainFilesVm @AssistedInject constructor(
 
     private fun closeDialog(action: MainFilesAction.CloseDialog): Flow<MainFilesState> =
         actualState.change {
-            it.copy(openDialogDetails = false, openRenameDialog = false)
+            it.copy(openDialogDetails = false, openRenameDialog = false,showInvalidTitle = false,
+                showDuplicateMsg = false)
         }
 
     private fun renameItem(action: MainFilesAction.RenameItemAction): Flow<MainFilesState> {
         if (!mainFilesUseCase.checkTitleFile(action.title)) {
             return actualState.change {
-                it
+                it.copy(
+                    showInvalidTitle = true,
+                    showDuplicateMsg = false
+                )
             }
         }
 
@@ -236,16 +242,24 @@ class MainFilesVm @AssistedInject constructor(
 
         if (actualState.files.any { it.title == action.title }) {
             return actualState.change {
-                it
+                it.copy(
+                    showInvalidTitle = false,
+                    showDuplicateMsg = true
+                )
             }
         }
 
-        return actualState.change { filesState ->
+        return actualState.change { state ->
             mainFilesUseCase.renameFile(action.title, actualState.files.first {
                 it.isChecked
             }.absolutePath)
 
-            filesState.copy(openRenameDialog = false, editMode = false)
+            state.copy(
+                openRenameDialog = false,
+                editMode = false,
+                showInvalidTitle = false,
+                showDuplicateMsg = false
+            )
         }
     }
 
