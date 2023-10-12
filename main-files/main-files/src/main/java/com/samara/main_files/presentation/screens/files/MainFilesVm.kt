@@ -3,7 +3,6 @@ package com.samara.main_files.presentation.screens.files
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.samara.main_files.R
-import com.samara.main_files.presentation.component.BottomFileActionType
 import com.samara.main_files.presentation.mappers.toFileDomain
 import com.samara.main_files.presentation.mappers.toFileUI
 import com.samara.main_files_api.domain.useCase.IMainFilesUseCase
@@ -112,7 +111,7 @@ class MainFilesVm @AssistedInject constructor(
 
     private fun openFile(action: MainFilesAction.ClickOnElement): Flow<MainFilesState> {
         return action.ignoreState {
-            action.file.absolutePath?.let {
+            action.file.absolutePath.let {
                 effect(
                     MainFilesEffect.OpenFile(
                         mainFilesUseCase.convertPathToUri(action.file.absolutePath), action.file.ext
@@ -140,10 +139,19 @@ class MainFilesVm @AssistedInject constructor(
                 selectedItemsSize
             )
 
+            val newBottomActions = it.bottomActions.toMutableList().map { el ->
+                if (el.type == BottomFileActionType.RENAME)
+                    el.copy(isActive = selectedItemsSize == 1)
+                else {
+                    el.copy(isActive = selectedItemsSize > 0)
+                }
+            }
+
             it.copy(
                 editMode = true,
                 files = newFiles,
-                selectedItemsText = selectedItemsText
+                selectedItemsText = selectedItemsText,
+                bottomActions = newBottomActions
             )
         }
     }
@@ -172,10 +180,19 @@ class MainFilesVm @AssistedInject constructor(
                 selectedItemsSize
             )
 
+            val newBottomActions = it.bottomActions.toMutableList().map { el ->
+                    if (el.type == BottomFileActionType.RENAME)
+                        el.copy(isActive = selectedItemsSize == 1)
+                    else {
+                        el.copy(isActive = selectedItemsSize > 0)
+                    }
+            }
+
             it.copy(
                 editMode = true,
                 files = newFiles,
-                selectedItemsText = selectedItemsText
+                selectedItemsText = selectedItemsText,
+                bottomActions = newBottomActions
             )
         }
     }

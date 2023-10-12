@@ -1,7 +1,6 @@
 package com.samara.main_files.presentation.screens.files
 
 import android.net.Uri
-import com.samara.main_files.presentation.component.BottomFileActionType
 import com.samara.main_files.presentation.mappers.FileExtensions
 import com.samara.main_files.presentation.models.FileUi
 import com.samara.main_files_api.domain.models.FileDomain
@@ -43,39 +42,3 @@ sealed interface MainFilesEffect {
         val ext: FileExtensions
     ): MainFilesEffect
 }
-
-/**
- * private static boolean isValidFatFilenameChar(char c) {
-if ((0x00 <= c && c <= 0x1f)) {
-return false;
-}
-switch (c) {
-case '"':
-case '*':
-case '/':
-case ':':
-case '<':
-case '>':
-case '?':
-case '\\':
-case '|':
-case 0x7F:
-return false;
-default:
-return true;
-}
-}
-
-private static boolean isValidExtFilenameChar(char c) {
-switch (c) {
-case '\0':
-case '/':
-return false;
-default:
-return true;
-}
-}
-private static final String ReservedChars = "|\\?*<\":>+[]/'";
-
- ограничение в 60 символов
- */

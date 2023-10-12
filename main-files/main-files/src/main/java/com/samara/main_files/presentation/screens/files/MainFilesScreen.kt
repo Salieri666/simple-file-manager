@@ -28,7 +28,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import com.samara.main_files.presentation.component.BottomFileActionType
 import com.samara.main_files.presentation.component.BottomFileActions
 import com.samara.main_files.presentation.component.BottomSheetChooseFileType
 import com.samara.main_files.presentation.component.DetailDialog
@@ -117,10 +116,14 @@ fun MainFilesScreen(
         )
     }) {
         if (state.openDialogDetails) {
-            DetailDialog(counts = state.countsDialogDetails, size = state.size, lastChanged = state.lastChanged,
+            DetailDialog(
+                counts = state.countsDialogDetails,
+                size = state.size,
+                lastChanged = state.lastChanged,
                 onConfirmation = {
                     vm.dispatch(MainFilesAction.CloseDialog)
-                })
+                }
+            )
         }
 
         if (state.openRenameDialog) {
@@ -136,6 +139,7 @@ fun MainFilesScreen(
 
         MainFilesScreen(
             files = state.files,
+            bottomActions = state.bottomActions,
             uiState = state.uiState,
             isEditMode = state.editMode,
             selectedItemsText = state.selectedItemsText,
@@ -161,6 +165,7 @@ fun MainFilesScreen(
 @Composable
 fun MainFilesScreen(
     files: List<FileUi>,
+    bottomActions: List<BottomFileAction>,
     uiState: UiState,
     isEditMode: Boolean,
     selectedItemsText: String,
@@ -206,6 +211,7 @@ fun MainFilesScreen(
                         ) { isVisible ->
                             if (isVisible) {
                                 BottomFileActions(
+                                    bottomActions = bottomActions,
                                     modifier = Modifier.fillMaxWidth(),
                                     onClickItem = {
                                         bottomActionsClick(it)

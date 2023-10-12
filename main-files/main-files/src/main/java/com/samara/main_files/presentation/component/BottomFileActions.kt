@@ -19,11 +19,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.samara.main_files.R
+import com.samara.main_files.presentation.screens.files.BottomFileAction
+import com.samara.main_files.presentation.screens.files.BottomFileActionType
+import com.samara.main_files.presentation.screens.files.getBottomFileActionsList
 import theme.Dimens
 
 @Composable
 fun BottomFileActions(
+    bottomActions: List<BottomFileAction>,
     modifier: Modifier = Modifier,
     onClickItem: (BottomFileActionType) -> Unit = {}
 ) {
@@ -34,10 +37,9 @@ fun BottomFileActions(
             modifier = modifier,
             horizontalArrangement = Arrangement.Center
         ) {
-            BottomFileAction(R.drawable.move, R.string.move, onClick = { onClickItem(BottomFileActionType.MOVE) })
-            BottomFileAction(R.drawable.delete, R.string.delete, onClick = { onClickItem(BottomFileActionType.DELETE) })
-            BottomFileAction(R.drawable.text_field, R.string.rename, onClick = { onClickItem(BottomFileActionType.RENAME) })
-            BottomFileAction(R.drawable.detail, R.string.details, onClick = { onClickItem(BottomFileActionType.DETAIL) })
+            bottomActions.forEach {
+                BottomFileAction(it.icon, it.title, it.isActive, onClick = { onClickItem(it.type) })
+            }
         }
     }
 
@@ -47,12 +49,13 @@ fun BottomFileActions(
 private fun BottomFileAction(
     @DrawableRes iconId: Int,
     @StringRes iconTextId: Int,
+    isActive: Boolean,
     onClick: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier
             .padding(Dimens.mediumPadding)
-            .clickable {
+            .clickable(enabled = isActive) {
                 onClick()
             },
         horizontalAlignment = Alignment.CenterHorizontally
@@ -61,7 +64,8 @@ private fun BottomFileAction(
             painter = painterResource(
                 id = iconId
             ),
-            contentDescription = stringResource(id = iconTextId)
+            contentDescription = stringResource(id = iconTextId),
+            tint = if (isActive) Color.Black else Color.Gray
         )
         Text(text = stringResource(id = iconTextId))
     }
@@ -70,9 +74,5 @@ private fun BottomFileAction(
 @Preview(showBackground = true)
 @Composable
 fun BottomFileActionsPreview() {
-    BottomFileActions(modifier = Modifier.fillMaxWidth())
-}
-
-enum class BottomFileActionType {
-    MOVE, DELETE, RENAME, DETAIL
+    BottomFileActions(bottomActions = getBottomFileActionsList(), modifier = Modifier.fillMaxWidth())
 }
