@@ -9,11 +9,12 @@
     <string name="unknown">Unknown</string>
     <string name="excel">Excel</string>
 
-    <string name="move">Move</string>
+    <string name="copy">Copy</string>
     <string name="delete">Delete</string>
     <string name="rename">Rename</string>
     <string name="details">Details</string>
     <string name="cancel">Cancel</string>
+    <string name="paste">Paste</string>
 
     <string name="detailTitle">Details</string>
     <string name="numberOfElements">Items selected: %d</string>

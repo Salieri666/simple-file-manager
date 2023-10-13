@@ -17,8 +17,10 @@ data class MainFilesState(
     val depthNumber: Long = 0L,
     val currentPath: String? = "",
     val files: List<FileUi> = listOf(),
+    val filesForPasting: List<FileUi> = emptyList(),
     val nameTypeFilesList: List<FileExtensions> = getNameTypeFilesList(),
     val editMode: Boolean = false,
+    val pasteMode: Boolean = false,
     val selectedItemsText: String = "",
     val openDialogDetails: Boolean = false,
     val openRenameDialog: Boolean = false,
@@ -38,21 +40,32 @@ fun getNameTypeFilesList(): List<FileExtensions> {
 
 fun getBottomFileActionsList(): List<BottomFileAction> {
     return arrayListOf(
-        BottomFileAction(BottomFileActionType.MOVE, R.drawable.move, R.string.move, true),
+        BottomFileAction(BottomFileActionType.COPY, R.drawable.move, R.string.copy, true),
         BottomFileAction(BottomFileActionType.DELETE, R.drawable.delete, R.string.delete, true),
         BottomFileAction(BottomFileActionType.RENAME, R.drawable.text_field, R.string.rename, true),
-        BottomFileAction(BottomFileActionType.DETAIL, R.drawable.detail, R.string.details, true),
+        BottomFileAction(BottomFileActionType.DETAIL, R.drawable.detail, R.string.details, true)
     )
 }
+
+fun getBottomActionsForPasting(): List<BottomFileAction> {
+    return arrayListOf(
+        BottomFileAction(BottomFileActionType.PASTE, R.drawable.paste, R.string.paste, true),
+        BottomFileAction(BottomFileActionType.CANCEL, R.drawable.cancel_bottom, R.string.cancel, true)
+    )
+}
+
+
 @Parcelize
 data class BottomFileAction(
    val type: BottomFileActionType,
    @DrawableRes val icon: Int,
    @StringRes val title: Int,
-   val isActive: Boolean
+   val isActive: Boolean,
+   val isVisible: Boolean = true
 ) : Parcelable
 
 enum class BottomFileActionType {
-    MOVE, DELETE, RENAME, DETAIL
+    COPY, DELETE, RENAME, DETAIL,
+    PASTE, CANCEL //for MOVE action after click
 }
 

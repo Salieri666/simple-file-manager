@@ -10,4 +10,6 @@ interface IFilesRepo {
     suspend fun deleteFiles(paths: List<String>)
 
     suspend fun renameFile(newTitle: String, path: String)
+
+    suspend fun moveFiles(files: List<File>, path: String)
 }

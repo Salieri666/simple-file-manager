@@ -213,4 +213,17 @@ class MainFilesUseCase @Inject constructor(
             currentPath = actualState.currentPath ?: ""
         )
     }
+
+    override fun moveFiles(listFiles: List<FileDomain>) = launchWork {
+        if (listFiles.isNotEmpty())
+            filesRepo.moveFiles(listFiles.map { File(it.absolutePath) }, actualState.currentPath)
+
+        val result = getFiles(actualState.currentPath)
+
+        actualState.copy(
+            listFiles = result,
+            depthNumber = actualState.depthNumber,
+            currentPath = actualState.currentPath ?: ""
+        )
+    }
 }

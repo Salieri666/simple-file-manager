@@ -86,10 +86,22 @@ class MainFilesVm @AssistedInject constructor(
 
     private fun back(action: MainFilesAction.BackAction): Flow<MainFilesState> {
         return actualState.change {
-            if (it.editMode) {
+            if (action.fromTop && it.pasteMode) {
                 return@change it.copy(
                     editMode = false,
-                    files = it.files.map { file -> file.copy(isChecked = false) }
+                    pasteMode = false,
+                    files = it.files.map { file -> file.copy(isChecked = false) },
+                    filesForPasting = emptyList(),
+                    bottomActions = getBottomFileActionsList()
+                )
+            }
+
+            if (it.editMode && !it.pasteMode) {
+                return@change it.copy(
+                    editMode = false,
+                    pasteMode = false,
+                    files = it.files.map { file -> file.copy(isChecked = false) },
+                    filesForPasting = emptyList()
                 )
             }
 
@@ -139,7 +151,7 @@ class MainFilesVm @AssistedInject constructor(
                 selectedItemsSize
             )
 
-            val newBottomActions = it.bottomActions.toMutableList().map { el ->
+            val newBottomActions = getBottomFileActionsList().toMutableList().map { el ->
                 if (el.type == BottomFileActionType.RENAME)
                     el.copy(isActive = selectedItemsSize == 1)
                 else {
@@ -149,6 +161,7 @@ class MainFilesVm @AssistedInject constructor(
 
             it.copy(
                 editMode = true,
+                pasteMode = false,
                 files = newFiles,
                 selectedItemsText = selectedItemsText,
                 bottomActions = newBottomActions
@@ -203,8 +216,16 @@ class MainFilesVm @AssistedInject constructor(
         return actualState.change {
 
             when (action.action) {
-                BottomFileActionType.MOVE -> {
+                BottomFileActionType.COPY -> {
+                    val filesForPaste = it.files.filter { el -> el.isChecked }
 
+                    return@change it.copy(
+                        bottomActions = getBottomActionsForPasting(),
+                        files = it.files.map { el -> el.copy(isChecked = false) },
+                        editMode = false,
+                        pasteMode = true,
+                        filesForPasting = filesForPaste
+                    )
                 }
 
                 BottomFileActionType.DELETE -> {
@@ -232,9 +253,27 @@ class MainFilesVm @AssistedInject constructor(
                         )
                     } else it
                 }
-            }
 
-            it
+                BottomFileActionType.PASTE -> {
+                    mainFilesUseCase.moveFiles(it.filesForPasting.map { el -> el.toFileDomain() })
+
+                    return@change it.copy(
+                        bottomActions = getBottomFileActionsList(),
+                        editMode = false,
+                        pasteMode = false,
+                        filesForPasting = emptyList()
+                    )
+                }
+
+                BottomFileActionType.CANCEL -> {
+                    return@change it.copy(
+                        bottomActions = getBottomFileActionsList(),
+                        editMode = false,
+                        pasteMode = false,
+                        filesForPasting = emptyList()
+                    )
+                }
+            }
         }
 
     }

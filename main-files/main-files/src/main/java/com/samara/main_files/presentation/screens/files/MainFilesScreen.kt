@@ -84,17 +84,21 @@ fun MainFilesScreen(
 
 
 
-    BackHandler(state.depthNumber > 0 || sheetState.isVisible || state.editMode) {
+    BackHandler(state.depthNumber > 0 || sheetState.isVisible || state.editMode
+            || (state.pasteMode && state.depthNumber > 1)) {
         when {
+            state.pasteMode && state.depthNumber > 0 -> {
+                vm.dispatch(MainFilesAction.BackAction())
+            }
 
-            sheetState.isVisible -> {
+            sheetState.isVisible && !state.pasteMode -> {
                 scope.launch {
                     sheetState.hide()
                 }
             }
 
             else -> {
-                vm.dispatch(MainFilesAction.BackAction)
+                vm.dispatch(MainFilesAction.BackAction())
             }
 
         }
@@ -142,6 +146,7 @@ fun MainFilesScreen(
             bottomActions = state.bottomActions,
             uiState = state.uiState,
             isEditMode = state.editMode,
+            isPasteMode = state.pasteMode,
             selectedItemsText = state.selectedItemsText,
             modifier = modifier,
             onClick = { file ->
@@ -151,7 +156,7 @@ fun MainFilesScreen(
                 vm.dispatch(MainFilesAction.ToEditMode(file))
             },
             cancelClick = {
-                vm.dispatch(MainFilesAction.BackAction)
+                vm.dispatch(MainFilesAction.BackAction(true))
             },
             bottomActionsClick = { action ->
                 vm.dispatch(MainFilesAction.ClickOnBottomActions(action))
@@ -168,6 +173,7 @@ fun MainFilesScreen(
     bottomActions: List<BottomFileAction>,
     uiState: UiState,
     isEditMode: Boolean,
+    isPasteMode: Boolean,
     selectedItemsText: String,
     modifier: Modifier = Modifier,
     onClick: (FileUi) -> Unit,
@@ -178,14 +184,12 @@ fun MainFilesScreen(
 
     when (uiState) {
         UiState.Success -> {
-            if (files.isEmpty()) {
-                Text(text = "Folder is empty")
-            } else {
+
                 Scaffold(
                     modifier = modifier,
                     topBar = {
                         AnimatedContent(
-                            targetState = isEditMode,
+                            targetState = isEditMode || isPasteMode,
                             transitionSpec = {
                                 slideInVertically() with slideOutVertically()
                             }, label = "TopBarAnimation"
@@ -204,7 +208,7 @@ fun MainFilesScreen(
                     },
                     bottomBar = {
                         AnimatedContent(
-                            targetState = isEditMode,
+                            targetState = isEditMode || isPasteMode,
                             transitionSpec = {
                                 slideInVertically { height -> height } with slideOutVertically { height -> height }
                             }, label = "BottomBarAnimation"
@@ -221,28 +225,30 @@ fun MainFilesScreen(
                         }
                     }
                 ) { paddingValues ->
-                    LazyColumn(modifier = Modifier.padding(paddingValues)) {
+                    if (files.isEmpty()) {
+                        Text(modifier = Modifier.padding(paddingValues), text = "Folder is empty")
+                    } else {
 
-                        items(files, key = { it.absolutePath }) {
-                            it.apply {
-                                FileComponent(
-                                    title = title,
-                                    isDir = isDir,
-                                    size = size,
-                                    changedDate = changedDate,
-                                    isChecked = isChecked,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    onClick = { onClick(it) },
-                                    onLongClick = { onLongClick(it) }
-                                )
+                        LazyColumn(modifier = Modifier.padding(paddingValues)) {
+
+                            items(files, key = { it.absolutePath }) {
+                                it.apply {
+                                    FileComponent(
+                                        title = title,
+                                        isDir = isDir,
+                                        size = size,
+                                        changedDate = changedDate,
+                                        isChecked = isChecked,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        onClick = { onClick(it) },
+                                        onLongClick = { onLongClick(it) }
+                                    )
+                                }
                             }
+
                         }
-
                     }
-
-
                 }
-            }
         }
 
         else -> {}

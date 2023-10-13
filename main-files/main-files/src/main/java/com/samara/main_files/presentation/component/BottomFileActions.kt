@@ -15,8 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.samara.main_files.presentation.screens.files.BottomFileAction
@@ -38,7 +39,8 @@ fun BottomFileActions(
             horizontalArrangement = Arrangement.Center
         ) {
             bottomActions.forEach {
-                BottomFileAction(it.icon, it.title, it.isActive, onClick = { onClickItem(it.type) })
+                if (it.isVisible)
+                    BottomFileAction(it.icon, it.title, it.isActive, onClick = { onClickItem(it.type) })
             }
         }
     }
@@ -61,9 +63,7 @@ private fun BottomFileAction(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            painter = painterResource(
-                id = iconId
-            ),
+            ImageVector.vectorResource(iconId),
             contentDescription = stringResource(id = iconTextId),
             tint = if (isActive) Color.Black else Color.Gray
         )

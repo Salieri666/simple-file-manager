@@ -8,7 +8,9 @@ import presentation.base.Action
 
 sealed interface MainFilesAction : Action {
     object InitRoot : MainFilesAction
-    object BackAction : MainFilesAction
+    data class BackAction(
+        val fromTop: Boolean = false
+    ) : MainFilesAction
 
     data class StateChangedAction(
         val listFiles: List<FileDomain>,

@@ -11,8 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -26,33 +27,36 @@ fun TopBarComponent(
     onCancelClick: () -> Unit = {}
 ) {
     Column(modifier = modifier) {
-        ConstraintLayout(modifier =  Modifier.fillMaxWidth()) {
+        ConstraintLayout(modifier = Modifier.fillMaxWidth()) {
             val (cancelIcon, title) = createRefs()
 
-           Box(
+            Box(
                 modifier = Modifier
                     .constrainAs(cancelIcon) {
                         top.linkTo(parent.top, margin = Dimens.enlargedPadding)
                         start.linkTo(parent.start, margin = Dimens.enlargedPadding)
-                    }.padding(bottom = Dimens.enlargedPadding)
+                    }
+                    .padding(bottom = Dimens.enlargedPadding)
                     .clickable {
                         onCancelClick()
                     }
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.cancel),
+                    ImageVector.vectorResource(R.drawable.cancel),
                     contentDescription = stringResource(
                         id = R.string.cancel
                     )
                 )
             }
 
-            Text(text = titleString, modifier = Modifier.constrainAs(title) {
-                start.linkTo(parent.start)
-                top.linkTo(cancelIcon.top)
-                bottom.linkTo(cancelIcon.bottom)
-                end.linkTo(parent.end)
-            }.padding(bottom = Dimens.enlargedPadding))
+            Text(text = titleString, modifier = Modifier
+                .constrainAs(title) {
+                    start.linkTo(parent.start)
+                    top.linkTo(cancelIcon.top)
+                    bottom.linkTo(cancelIcon.bottom)
+                    end.linkTo(parent.end)
+                }
+                .padding(bottom = Dimens.enlargedPadding))
         }
 
         Divider(thickness = 1.dp, color = Color.Black)

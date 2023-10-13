@@ -38,4 +38,6 @@ interface IMainFilesUseCase {
     fun checkTitleFile(title: String): Boolean
 
     fun renameFile(newTitle: String, path: String)
+
+    fun moveFiles(listFiles: List<FileDomain>)
 }

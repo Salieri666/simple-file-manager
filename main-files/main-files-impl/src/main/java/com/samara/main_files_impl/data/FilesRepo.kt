@@ -7,9 +7,11 @@ import di.modules.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
 import javax.inject.Inject
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
-import kotlin.io.path.deleteIfExists
+import kotlin.io.path.deleteRecursively
 
 class FilesRepo @Inject constructor(
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher
@@ -29,10 +31,11 @@ class FilesRepo @Inject constructor(
         return@withContext Environment.getExternalStorageDirectory().absolutePath
     }
 
+    @OptIn(ExperimentalPathApi::class)
     override suspend fun deleteFiles(paths: List<String>) = withContext(ioDispatcher) {
         for (el: String in paths) {
             val file = Path(el)
-            file.deleteIfExists()
+            file.deleteRecursively()
         }
     }
 
@@ -45,6 +48,25 @@ class FilesRepo @Inject constructor(
 
             val newFile = File(newPath.joinToString(File.separator))
             val rename = oldFile.renameTo(newFile)
+        }
+    }
+
+    override suspend fun moveFiles(files: List<File>, path: String) {
+        for (file: File in files) {
+            val newPath = file.absolutePath.split(File.separator).last()
+
+            val destFile = File(path, newPath).apply {
+                if (!parentFile.canWrite()) {
+                    throw IOException("cannot write to $parent")
+                } else if (exists() && !canWrite()) {
+                    throw IOException("cannot write to ${this.absolutePath}")
+                }
+            }
+
+            file.copyRecursively(
+                target = destFile,
+                onError = { _, exception ->  OnErrorAction.SKIP }
+            )
         }
     }
 }
